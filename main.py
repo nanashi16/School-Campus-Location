@@ -25,8 +25,6 @@ locations = {
 
 # ---------------------------------
 # NODE SECURITY PENALTIES
-# 1 = Low Permission
-# 5 = High Permission
 # ---------------------------------
 node_penalty = {
     "A": 2,
@@ -50,7 +48,6 @@ node_penalty = {
 
 # ---------------------------------
 # GRAPH CONNECTIONS
-# Distances from the image lines
 # ---------------------------------
 graph = {
 
@@ -113,7 +110,7 @@ def dijkstra(start, end):
             # Add node security penalty
             penalty = node_penalty[neighbor]
 
-            total_cost = current_cost + edge_distance + penalty # Adjust penalty weight as needed
+            total_cost = current_cost + edge_distance + penalty
 
             if total_cost < distances[neighbor]:
 
@@ -137,7 +134,7 @@ def dijkstra(start, end):
 # ---------------------------------
 # DISPLAY MENU
 # ---------------------------------
-print("===== CAMPUS NAVIGATION SYSTEM =====\n") 
+print("===== CAMPUS NAVIGATION SYSTEM =====\n")
 
 print("AVAILABLE LOCATIONS:\n")
 
@@ -185,6 +182,15 @@ else:
 
     print(f"\nTotal Route Cost: {total_cost}")
 
-    walking_time = total_cost / 1.4
+    # ---------------------------------
+    # REALISTIC WALKING TIME
+    # ---------------------------------
+    walking_time_seconds = total_cost * 20
 
-    print(f"Estimated Walking Time: {walking_time:.2f} seconds")
+    minutes = walking_time_seconds // 60
+    seconds = walking_time_seconds % 60
+
+    print(
+        f"Estimated Walking Time: "
+        f"{int(minutes)} minute(s) and {int(seconds)} second(s)"
+    )
