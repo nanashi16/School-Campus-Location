@@ -24,14 +24,39 @@ locations = {
 }
 
 # ---------------------------------
+# NODE SECURITY PENALTIES
+# 1 = Low Permission
+# 5 = High Permission
+# ---------------------------------
+node_penalty = {
+    "A": 2,
+    "B": 1,
+    "C": 2,
+    "D": 5,
+    "E": 2,
+    "F": 2,
+    "G": 3,
+    "H": 1,
+    "I": 3,
+    "J": 2,
+    "K": 2,
+    "L": 3,
+    "M": 3,
+    "N": 2,
+    "O": 1,
+    "P": 3,
+    "Q": 4
+}
+
+# ---------------------------------
 # GRAPH CONNECTIONS
-# Based on your image distances
+# Distances from the image lines
 # ---------------------------------
 graph = {
 
     "A": [("H", 1), ("B", 2), ("D", 4)],
 
-    "B": [("A", 2), ("C", 1), ("K", 8)],
+    "B": [("A", 2), ("C", 1), ("G", 1), ("K", 8)],
 
     "C": [("B", 1), ("D", 1), ("E", 2), ("H", 1)],
 
@@ -41,17 +66,17 @@ graph = {
 
     "F": [("E", 1)],
 
-    "G": [("E", 2), ("H", 1), ("I", 1)],
+    "G": [("B", 1), ("E", 2), ("I", 1)],
 
     "H": [("A", 1), ("C", 1), ("G", 1)],
 
-    "I": [("G", 1), ("J", 2), ("L", 2)],
+    "I": [("G", 1), ("J", 2)],
 
     "J": [("I", 2), ("K", 2)],
 
     "K": [("B", 8), ("J", 2), ("O", 3)],
 
-    "L": [("I", 2), ("M", 1), ("P", 3)],
+    "L": [("M", 1), ("P", 3)],
 
     "M": [("O", 1), ("N", 1), ("L", 1)],
 
@@ -65,11 +90,12 @@ graph = {
 }
 
 # ---------------------------------
-# DIJKSTRA'S ALGORITHM
+# DIJKSTRA WITH NODE PENALTY
 # ---------------------------------
 def dijkstra(start, end):
 
     pq = [(0, start)]
+
     distances = {node: float('inf') for node in graph}
     previous = {node: None for node in graph}
 
@@ -77,23 +103,26 @@ def dijkstra(start, end):
 
     while pq:
 
-        current_distance, current_node = heapq.heappop(pq)
+        current_cost, current_node = heapq.heappop(pq)
 
         if current_node == end:
             break
 
-        for neighbor, weight in graph[current_node]:
+        for neighbor, edge_distance in graph[current_node]:
 
-            distance = current_distance + weight
+            # Add node security penalty
+            penalty = node_penalty[neighbor]
 
-            if distance < distances[neighbor]:
+            total_cost = current_cost + edge_distance + penalty # Adjust penalty weight as needed
 
-                distances[neighbor] = distance
+            if total_cost < distances[neighbor]:
+
+                distances[neighbor] = total_cost
                 previous[neighbor] = current_node
 
-                heapq.heappush(pq, (distance, neighbor))
+                heapq.heappush(pq, (total_cost, neighbor))
 
-    # Reconstruct shortest path
+    # Reconstruct path
     path = []
     node = end
 
@@ -108,12 +137,15 @@ def dijkstra(start, end):
 # ---------------------------------
 # DISPLAY MENU
 # ---------------------------------
-print("===== CAMPUS NAVIGATION SYSTEM =====\n")
+print("===== CAMPUS NAVIGATION SYSTEM =====\n") 
 
 print("AVAILABLE LOCATIONS:\n")
 
 for key, value in locations.items():
-    print(f"{key} - {value}")
+
+    security = node_penalty[key]
+
+    print(f"{key} - {value} | Security Level: {security}")
 
 print("\n")
 
@@ -132,26 +164,27 @@ if start not in locations or end not in locations:
 
 else:
 
-    # Find shortest path
-    path, total_distance = dijkstra(start, end)
+    path, total_cost = dijkstra(start, end)
 
     # ---------------------------------
     # DISPLAY RESULT
     # ---------------------------------
-    print("\n===== SHORTEST ROUTE =====\n")
+    print("\n===== SHORTEST SECURE ROUTE =====\n")
 
     for i in range(len(path)):
 
         node = path[i]
 
-        print(f"{node} - {locations[node]}")
+        print(
+            f"{node} - {locations[node]} "
+            f"(Security Level: {node_penalty[node]})"
+        )
 
         if i != len(path) - 1:
             print("        ↓")
 
-    print(f"\nTotal Distance: {total_distance} units")
+    print(f"\nTotal Route Cost: {total_cost}")
 
-    # Estimated walking time
-    walking_time = total_distance / 0.5
+    walking_time = total_cost / 1.4
 
     print(f"Estimated Walking Time: {walking_time:.2f} seconds")
