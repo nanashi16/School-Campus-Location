@@ -152,6 +152,6 @@ else:
     print(f"\nTotal Distance: {total_distance} units")
 
     # Estimated walking time
-    walking_time = total_distance / 1.4
+    walking_time = total_distance / 0.5
 
     print(f"Estimated Walking Time: {walking_time:.2f} seconds")
